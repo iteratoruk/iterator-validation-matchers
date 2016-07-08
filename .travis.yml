@@ -8,3 +8,8 @@ branches:
   only:
   - master
   - "/^iterator-validation-matchers-[0-9]+\\.[0-9]+\\.[0-9]+/"
+after_success:
+- mvn clean test jacoco:report coveralls:report
+env:
+  global:
+    secure: Dlf0TC10IYH/DcmI5Z+5V75nh8i2GbL8lIZVVgPZrvL1OFR8PKRX0182+ILcJA62kI3vGEvZ46tTuE5ifRX2NdYUcr2jHIvryv1RLsYs8cAv/tcnjyLsqpTNrTsS6ZZe+oiZkwOTafUUEZR2PuioVAXy70NUHOK06pjke20WsRqyzq88dyT3fp10bkP+cAIwI+GWqoJaCGlagnpR+1OcYAnO2btlGI1DrRPhR+ynmLVlusltF5THLA0yMTHZDTiceZeFxCurfQGmahTqm99lTKSm9LguqvZzPY7i3FlstmmOdIYZ/fLap6Gq5v6lutpJ1xIA+MjEfQwK3kfnN41zpE1ICcMDpSoAg5zfHWj22nTbq38RUk1xSAZYt4ho/Xwz4AjLIExJgtAwf3gKA+bMib5ZGrzIv3LnR3FoEis7FNFyiSKGLJr06WkqW4vCBKCUROXipBFyPQSzolatzGEM/fe6Ave0+yKDc7YYZ92qo/7M4jxneV52mAXaSlI6+Ssfq0HrBnqS4JrwGnekbr0c3fozLr0hr5Ge1vubuKDY6/1t0FV/9lubDzBWizG+s/31PsVPeWbudUVimmHH6uPaEYM5RjGtyJKbreIRq8xSC0ybUpou4X19lkjTYV+vgo/ST5U7lDEHCkk1vhtUHdGSpSeNe7LcUfVNr75F5aWOqEE=
