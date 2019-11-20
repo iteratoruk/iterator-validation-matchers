@@ -52,6 +52,15 @@ import org.hibernate.validator.constraints.URL;
 
 public final class ValidationMatchers {
 
+  private static final String VALUE = "value";
+  private static final String START_INDEX = "startIndex";
+  private static final String END_INDEX = "endIndex";
+  private static final String CHECK_DIGIT_INDEX = "checkDigitIndex";
+  private static final String IGNORE_NON_DIGIT_CHARACTERS = "ignoreNonDigitCharacters";
+  private static final String THRESHOLD = "threshold";
+  private static final String TREAT_CHECK_10_AS = "treatCheck10As";
+  private static final String PROTOCOL = "protocol";
+
   public static <T> Matcher<Class<T>> hasAssertFalseAnnotation(String fieldName) {
     return hasAssertFalseAnnotation(fieldName, AnnotationMap.from(AssertFalse.class));
   }
@@ -81,14 +90,14 @@ public final class ValidationMatchers {
 
   public static <T> Matcher<Class<T>> hasDecimalMaxAnnotation(String fieldName, String value) {
     return hasDecimalMaxAnnotation(
-        fieldName, AnnotationMap.from(DecimalMax.class).set("value", value));
+        fieldName, AnnotationMap.from(DecimalMax.class).set(VALUE, value));
   }
 
   public static <T> Matcher<Class<T>> hasDecimalMaxAnnotation(
       String fieldName, String value, boolean inclusive) {
     return hasDecimalMaxAnnotation(
         fieldName,
-        AnnotationMap.from(DecimalMax.class).set("value", value).set("inclusive", inclusive));
+        AnnotationMap.from(DecimalMax.class).set(VALUE, value).set("inclusive", inclusive));
   }
 
   public static <T> Matcher<Class<T>> hasDecimalMaxAnnotation(
@@ -98,14 +107,14 @@ public final class ValidationMatchers {
 
   public static <T> Matcher<Class<T>> hasDecimalMinAnnotation(String fieldName, String value) {
     return hasDecimalMinAnnotation(
-        fieldName, AnnotationMap.from(DecimalMin.class).set("value", value));
+        fieldName, AnnotationMap.from(DecimalMin.class).set(VALUE, value));
   }
 
   public static <T> Matcher<Class<T>> hasDecimalMinAnnotation(
       String fieldName, String value, boolean inclusive) {
     return hasDecimalMinAnnotation(
         fieldName,
-        AnnotationMap.from(DecimalMin.class).set("value", value).set("inclusive", inclusive));
+        AnnotationMap.from(DecimalMin.class).set(VALUE, value).set("inclusive", inclusive));
   }
 
   public static <T> Matcher<Class<T>> hasDecimalMinAnnotation(
@@ -168,16 +177,14 @@ public final class ValidationMatchers {
 
   public static <T> Matcher<Class<T>> hasLuhnCheckAnnotation(String fieldName, int startIndex) {
     return hasLuhnCheckAnnotation(
-        fieldName, AnnotationMap.from(LuhnCheck.class).set("startIndex", startIndex));
+        fieldName, AnnotationMap.from(LuhnCheck.class).set(START_INDEX, startIndex));
   }
 
   public static <T> Matcher<Class<T>> hasLuhnCheckAnnotation(
       String fieldName, int startIndex, int endIndex) {
     return hasLuhnCheckAnnotation(
         fieldName,
-        AnnotationMap.from(LuhnCheck.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex));
+        AnnotationMap.from(LuhnCheck.class).set(START_INDEX, startIndex).set(END_INDEX, endIndex));
   }
 
   public static <T> Matcher<Class<T>> hasLuhnCheckAnnotation(
@@ -185,9 +192,9 @@ public final class ValidationMatchers {
     return hasLuhnCheckAnnotation(
         fieldName,
         AnnotationMap.from(LuhnCheck.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex));
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex));
   }
 
   public static <T> Matcher<Class<T>> hasLuhnCheckAnnotation(
@@ -199,10 +206,10 @@ public final class ValidationMatchers {
     return hasLuhnCheckAnnotation(
         fieldName,
         AnnotationMap.from(LuhnCheck.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex)
-            .set("ignoreNonDigitCharacters", ignoreNonDigitCharacters));
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex)
+            .set(IGNORE_NON_DIGIT_CHARACTERS, ignoreNonDigitCharacters));
   }
 
   public static <T> Matcher<Class<T>> hasLuhnCheckAnnotation(
@@ -211,7 +218,7 @@ public final class ValidationMatchers {
   }
 
   public static <T> Matcher<Class<T>> hasMaxAnnotation(String fieldName, long value) {
-    return hasMaxAnnotation(fieldName, AnnotationMap.from(Max.class).set("value", value));
+    return hasMaxAnnotation(fieldName, AnnotationMap.from(Max.class).set(VALUE, value));
   }
 
   public static <T> Matcher<Class<T>> hasMaxAnnotation(
@@ -220,7 +227,7 @@ public final class ValidationMatchers {
   }
 
   public static <T> Matcher<Class<T>> hasMinAnnotation(String fieldName, long value) {
-    return hasMinAnnotation(fieldName, AnnotationMap.from(Min.class).set("value", value));
+    return hasMinAnnotation(fieldName, AnnotationMap.from(Min.class).set(VALUE, value));
   }
 
   public static <T> Matcher<Class<T>> hasMinAnnotation(
@@ -230,16 +237,14 @@ public final class ValidationMatchers {
 
   public static <T> Matcher<Class<T>> hasMod10CheckAnnotation(String fieldName, int startIndex) {
     return hasMod10CheckAnnotation(
-        fieldName, AnnotationMap.from(Mod10Check.class).set("startIndex", startIndex));
+        fieldName, AnnotationMap.from(Mod10Check.class).set(START_INDEX, startIndex));
   }
 
   public static <T> Matcher<Class<T>> hasMod10CheckAnnotation(
       String fieldName, int startIndex, int endIndex) {
     return hasMod10CheckAnnotation(
         fieldName,
-        AnnotationMap.from(Mod10Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex));
+        AnnotationMap.from(Mod10Check.class).set(START_INDEX, startIndex).set(END_INDEX, endIndex));
   }
 
   public static <T> Matcher<Class<T>> hasMod10CheckAnnotation(
@@ -247,9 +252,9 @@ public final class ValidationMatchers {
     return hasMod10CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod10Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex));
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex));
   }
 
   public static <T> Matcher<Class<T>> hasMod10CheckAnnotation(
@@ -261,10 +266,10 @@ public final class ValidationMatchers {
     return hasMod10CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod10Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex)
-            .set("ignoreNonDigitCharacters", ignoreNonDigitCharacters));
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex)
+            .set(IGNORE_NON_DIGIT_CHARACTERS, ignoreNonDigitCharacters));
   }
 
   public static <T> Matcher<Class<T>> hasMod10CheckAnnotation(
@@ -277,10 +282,10 @@ public final class ValidationMatchers {
     return hasMod10CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod10Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex)
-            .set("ignoreNonDigitCharacters", ignoreNonDigitCharacters)
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex)
+            .set(IGNORE_NON_DIGIT_CHARACTERS, ignoreNonDigitCharacters)
             .set("multiplier", multiplier));
   }
 
@@ -295,10 +300,10 @@ public final class ValidationMatchers {
     return hasMod10CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod10Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex)
-            .set("ignoreNonDigitCharacters", ignoreNonDigitCharacters)
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex)
+            .set(IGNORE_NON_DIGIT_CHARACTERS, ignoreNonDigitCharacters)
             .set("multiplier", multiplier)
             .set("weight", weight));
   }
@@ -310,16 +315,14 @@ public final class ValidationMatchers {
 
   public static <T> Matcher<Class<T>> hasMod11CheckAnnotation(String fieldName, int startIndex) {
     return hasMod11CheckAnnotation(
-        fieldName, AnnotationMap.from(Mod11Check.class).set("startIndex", startIndex));
+        fieldName, AnnotationMap.from(Mod11Check.class).set(START_INDEX, startIndex));
   }
 
   public static <T> Matcher<Class<T>> hasMod11CheckAnnotation(
       String fieldName, int startIndex, int endIndex) {
     return hasMod11CheckAnnotation(
         fieldName,
-        AnnotationMap.from(Mod11Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex));
+        AnnotationMap.from(Mod11Check.class).set(START_INDEX, startIndex).set(END_INDEX, endIndex));
   }
 
   public static <T> Matcher<Class<T>> hasMod11CheckAnnotation(
@@ -327,9 +330,9 @@ public final class ValidationMatchers {
     return hasMod11CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod11Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex));
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex));
   }
 
   public static <T> Matcher<Class<T>> hasMod11CheckAnnotation(
@@ -341,10 +344,10 @@ public final class ValidationMatchers {
     return hasMod11CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod11Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex)
-            .set("ignoreNonDigitCharacters", ignoreNonDigitCharacters));
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex)
+            .set(IGNORE_NON_DIGIT_CHARACTERS, ignoreNonDigitCharacters));
   }
 
   public static <T> Matcher<Class<T>> hasMod11CheckAnnotation(
@@ -357,11 +360,11 @@ public final class ValidationMatchers {
     return hasMod11CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod11Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex)
-            .set("ignoreNonDigitCharacters", ignoreNonDigitCharacters)
-            .set("threshold", threshold));
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex)
+            .set(IGNORE_NON_DIGIT_CHARACTERS, ignoreNonDigitCharacters)
+            .set(THRESHOLD, threshold));
   }
 
   public static <T> Matcher<Class<T>> hasMod11CheckAnnotation(
@@ -375,12 +378,12 @@ public final class ValidationMatchers {
     return hasMod11CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod11Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex)
-            .set("ignoreNonDigitCharacters", ignoreNonDigitCharacters)
-            .set("threshold", threshold)
-            .set("treatCheck10As", treatCheck10As));
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex)
+            .set(IGNORE_NON_DIGIT_CHARACTERS, ignoreNonDigitCharacters)
+            .set(THRESHOLD, threshold)
+            .set(TREAT_CHECK_10_AS, treatCheck10As));
   }
 
   public static <T> Matcher<Class<T>> hasMod11CheckAnnotation(
@@ -395,12 +398,12 @@ public final class ValidationMatchers {
     return hasMod11CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod11Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex)
-            .set("ignoreNonDigitCharacters", ignoreNonDigitCharacters)
-            .set("threshold", threshold)
-            .set("treatCheck10As", treatCheck10As)
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex)
+            .set(IGNORE_NON_DIGIT_CHARACTERS, ignoreNonDigitCharacters)
+            .set(THRESHOLD, threshold)
+            .set(TREAT_CHECK_10_AS, treatCheck10As)
             .set("treatCheck11As", treatCheck11As));
   }
 
@@ -417,12 +420,12 @@ public final class ValidationMatchers {
     return hasMod11CheckAnnotation(
         fieldName,
         AnnotationMap.from(Mod11Check.class)
-            .set("startIndex", startIndex)
-            .set("endIndex", endIndex)
-            .set("checkDigitIndex", checkDigitIndex)
-            .set("ignoreNonDigitCharacters", ignoreNonDigitCharacters)
-            .set("threshold", threshold)
-            .set("treatCheck10As", treatCheck10As)
+            .set(START_INDEX, startIndex)
+            .set(END_INDEX, endIndex)
+            .set(CHECK_DIGIT_INDEX, checkDigitIndex)
+            .set(IGNORE_NON_DIGIT_CHARACTERS, ignoreNonDigitCharacters)
+            .set(THRESHOLD, threshold)
+            .set(TREAT_CHECK_10_AS, treatCheck10As)
             .set("treatCheck11As", treatCheck11As)
             .set("processingDirection", processingDirection));
   }
@@ -551,23 +554,20 @@ public final class ValidationMatchers {
   }
 
   public static <T> Matcher<Class<T>> hasUrlAnnotation(String fieldName, String protocol) {
-    return hasUrlAnnotation(fieldName, AnnotationMap.from(URL.class).set("protocol", protocol));
+    return hasUrlAnnotation(fieldName, AnnotationMap.from(URL.class).set(PROTOCOL, protocol));
   }
 
   public static <T> Matcher<Class<T>> hasUrlAnnotation(
       String fieldName, String protocol, String host) {
     return hasUrlAnnotation(
-        fieldName, AnnotationMap.from(URL.class).set("protocol", protocol).set("host", host));
+        fieldName, AnnotationMap.from(URL.class).set(PROTOCOL, protocol).set("host", host));
   }
 
   public static <T> Matcher<Class<T>> hasUrlAnnotation(
       String fieldName, String protocol, String host, int port) {
     return hasUrlAnnotation(
         fieldName,
-        AnnotationMap.from(URL.class)
-            .set("protocol", protocol)
-            .set("host", host)
-            .set("port", port));
+        AnnotationMap.from(URL.class).set(PROTOCOL, protocol).set("host", host).set("port", port));
   }
 
   public static <T> Matcher<Class<T>> hasUrlAnnotation(
