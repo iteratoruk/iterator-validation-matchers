@@ -48,10 +48,7 @@ public abstract class AbstractViolationsMatcher<T> extends TypeSafeMatcher<T> {
   }
 
   private void maybeDescribeField(Description description) {
-    f.ifPresent(
-        field -> {
-          describeField(description, field);
-        });
+    f.ifPresent(field -> describeField(description, field));
   }
 
   protected abstract void describeGenerally(Description description);
@@ -75,8 +72,10 @@ public abstract class AbstractViolationsMatcher<T> extends TypeSafeMatcher<T> {
   protected final boolean matchesSafely(T item) {
     actualViolations =
         v.validate(item).stream()
-            .filter(v -> f.map(n -> n.equals(v.getPropertyPath().toString())).orElse(true))
-            .map(v -> v.getConstraintDescriptor().getConstraintValidatorClasses())
+            .filter(
+                violation ->
+                    f.map(n -> n.equals(violation.getPropertyPath().toString())).orElse(true))
+            .map(violation -> violation.getConstraintDescriptor().getConstraintValidatorClasses())
             .flatMap(List::stream)
             .collect(Collectors.toList());
     return matches(actualViolations);
