@@ -19,6 +19,7 @@ import iterator.test.matchers.type.annotation.AnnotationMap;
 import iterator.test.matchers.type.annotation.FieldAnnotationMatcher;
 import iterator.test.matchers.type.annotation.TypeAnnotationMatcher;
 import java.lang.annotation.Annotation;
+import javax.validation.ConstraintValidator;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.DecimalMax;
@@ -60,6 +61,24 @@ public final class ValidationMatchers {
   private static final String THRESHOLD = "threshold";
   private static final String TREAT_CHECK_10_AS = "treatCheck10As";
   private static final String PROTOCOL = "protocol";
+
+  public static <T> Matcher<T> hasNoViolations() {
+    return new HasNoViolationsMatcher<>();
+  }
+
+  public static <T> Matcher<T> hasNoViolations(String field) {
+    return new HasNoViolationsMatcher<>(field);
+  }
+
+  public static <T, A extends Annotation, V extends ConstraintValidator<A, ?>>
+      Matcher<T> hasViolations(Class<V> constraintValidatorClass) {
+    return new HasViolationsMatcher<>(constraintValidatorClass);
+  }
+
+  public static <T, A extends Annotation, V extends ConstraintValidator<A, ?>>
+      Matcher<T> hasViolations(String fieldName, Class<V> constraintValidatorClass) {
+    return new HasViolationsMatcher<>(constraintValidatorClass, fieldName);
+  }
 
   public static <T> Matcher<Class<T>> hasAssertFalseAnnotation(String fieldName) {
     return hasAssertFalseAnnotation(fieldName, AnnotationMap.from(AssertFalse.class));

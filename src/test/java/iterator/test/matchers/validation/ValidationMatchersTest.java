@@ -15,6 +15,7 @@ import static iterator.test.matchers.validation.ValidationMatchers.hasMaxAnnotat
 import static iterator.test.matchers.validation.ValidationMatchers.hasMinAnnotation;
 import static iterator.test.matchers.validation.ValidationMatchers.hasMod10CheckAnnotation;
 import static iterator.test.matchers.validation.ValidationMatchers.hasMod11CheckAnnotation;
+import static iterator.test.matchers.validation.ValidationMatchers.hasNoViolations;
 import static iterator.test.matchers.validation.ValidationMatchers.hasNotBlankAnnotation;
 import static iterator.test.matchers.validation.ValidationMatchers.hasNotEmptyAnnotation;
 import static iterator.test.matchers.validation.ValidationMatchers.hasNotNullAnnotation;
@@ -25,13 +26,23 @@ import static iterator.test.matchers.validation.ValidationMatchers.hasSafeHtmlAn
 import static iterator.test.matchers.validation.ValidationMatchers.hasScriptAssertAnnotation;
 import static iterator.test.matchers.validation.ValidationMatchers.hasSizeAnnotation;
 import static iterator.test.matchers.validation.ValidationMatchers.hasUrlAnnotation;
+import static iterator.test.matchers.validation.ValidationMatchers.hasViolations;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import iterator.Reflection;
 import iterator.test.matchers.type.annotation.AnnotationMap;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintValidator;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.DecimalMax;
@@ -48,6 +59,9 @@ import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Pattern.Flag;
 import javax.validation.constraints.Size;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 import org.hibernate.validator.constraints.CreditCardNumber;
 import org.hibernate.validator.constraints.EAN;
 import org.hibernate.validator.constraints.EAN.Type;
@@ -61,13 +75,34 @@ import org.hibernate.validator.constraints.SafeHtml;
 import org.hibernate.validator.constraints.SafeHtml.WhiteListType;
 import org.hibernate.validator.constraints.ScriptAssert;
 import org.hibernate.validator.constraints.URL;
+import org.hibernate.validator.internal.constraintvalidators.bv.NotBlankValidator;
+import org.hibernate.validator.internal.constraintvalidators.bv.NotNullValidator;
+import org.hibernate.validator.internal.constraintvalidators.bv.size.SizeValidatorForCharSequence;
+import org.hibernate.validator.internal.constraintvalidators.hv.LengthValidator;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.ReflectionUtils;
 
 @ScriptAssert(lang = "foo", script = "bar")
 class ValidationMatchersTest {
 
   @ScriptAssert(script = "bar", lang = "foo", alias = "baz")
   private static class AnotherType {}
+
+  private static class Bean {
+
+    @NotNull
+    @Length(max = 4)
+    private final String foo;
+
+    @NotNull
+    @Max(42)
+    private final Integer bar;
+
+    private Bean(String foo, Integer bar) {
+      this.foo = foo;
+      this.bar = bar;
+    }
+  }
 
   @AssertFalse(message = "foo")
   private String assertFalseAnnotation;
@@ -1020,5 +1055,223 @@ class ValidationMatchersTest {
         not(
             hasUrlAnnotation(
                 "urlAnnotation", AnnotationMap.from(URL.class).set("protocol", "foo"))));
+  }
+
+  @Test
+  void shouldPassGivenNoViolationsOnAnyFieldWhenHasNoViolations() {
+    assertThat(new Bean("foo", 42), hasNoViolations());
+  }
+
+  @Test
+  void shouldPassGivenNoViolationsOnSpecifiedFieldWhenHasNoViolations() {
+    assertThat(new Bean("foo", 43), hasNoViolations("foo"));
+  }
+
+  @Test
+  void shouldFailGivenViolationsOnAnyFieldWhenHasNoViolations() {
+    assertThrows(
+        AssertionError.class,
+        () -> {
+          assertThat(new Bean(null, 42), hasNoViolations());
+        });
+  }
+
+  @Test
+  void shouldFailGivenViolationsOnSpecifiedFieldWhenHasNoViolations() {
+    assertThrows(
+        AssertionError.class,
+        () -> {
+          assertThat(new Bean(null, 42), hasNoViolations("foo"));
+        });
+  }
+
+  @Test
+  void shouldPassGivenViolationsOnAnyFieldForSpecifiedValidatorWhenHasViolations() {
+    assertThat(new Bean("foooo", 43), hasViolations(LengthValidator.class));
+  }
+
+  @Test
+  void shouldFailGivenNoViolationsOnAnyFieldForSpecifiedValidatorWhenHasViolations() {
+    assertThrows(
+        AssertionError.class,
+        () -> {
+          assertThat(new Bean("foooo", 42), hasViolations(SizeValidatorForCharSequence.class));
+        });
+  }
+
+  @Test
+  void shouldPassGivenViolationsOnSpecifiedFieldForSpecifiedValidatorWhenHasViolations() {
+    assertThat(new Bean("foooo", 43), hasViolations("foo", LengthValidator.class));
+  }
+
+  @Test
+  void shouldFailGivenNoViolationsOnSpecifiedFieldForSpecifiedValidatorWhenHasViolations() {
+    assertThrows(
+        AssertionError.class,
+        () -> {
+          assertThat(
+              new Bean("foooo", 42), hasViolations("foo", SizeValidatorForCharSequence.class));
+        });
+  }
+
+  @Test
+  void shouldDescribeHasNoViolations() {
+    // given
+    Matcher<Bean> matcher = new HasNoViolationsMatcher<>();
+    Description description = new StringDescription();
+    // when
+    matcher.describeTo(description);
+    // then
+    assertThat(description.toString(), is("no constraint violations"));
+  }
+
+  @Test
+  void shouldDescribeHasNoViolationsForField() {
+    // given
+    Matcher<Bean> matcher = new HasNoViolationsMatcher<>("foo");
+    Description description = new StringDescription();
+    // when
+    matcher.describeTo(description);
+    // then
+    assertThat(description.toString(), is("no constraint violations on field \"foo\""));
+  }
+
+  @Test
+  void shouldDescribeHasViolations() {
+    // given
+    Matcher<Bean> matcher = new HasViolationsMatcher<>(NotNullValidator.class);
+    Description description = new StringDescription();
+    // when
+    matcher.describeTo(description);
+    // then
+    assertThat(
+        description.toString(),
+        is("<" + NotNullValidator.class.toString() + "> constraint violation"));
+  }
+
+  @Test
+  void shouldDescribeHasViolationsForField() {
+    // given
+    Matcher<Bean> matcher = new HasViolationsMatcher<>(NotNullValidator.class, "foo");
+    Description description = new StringDescription();
+    // when
+    matcher.describeTo(description);
+    // then
+    assertThat(
+        description.toString(),
+        is("<" + NotNullValidator.class.toString() + "> constraint violation on field \"foo\""));
+  }
+
+  @Test
+  void shouldDescribeMismatchForHasNoViolations() {
+    // given
+    Matcher<Bean> matcher = new HasNoViolationsMatcher<>();
+    List<Class<? extends ConstraintValidator>> violations =
+        asList(NotNullValidator.class, NotBlankValidator.class);
+    setActualViolations(matcher, violations);
+    Description description = new StringDescription();
+    Bean bean = new Bean("foo", 42);
+    // when
+    matcher.describeMismatch(bean, description);
+    // then
+    assertThat(
+        description.toString(),
+        is(
+            "violated constraints <["
+                + violations.stream().map(Object::toString).collect(Collectors.joining(", "))
+                + "]>"));
+  }
+
+  @Test
+  void shouldDescribeMismatchForHasNoViolationsForField() {
+    // given
+    Matcher<Bean> matcher = new HasNoViolationsMatcher<>("foo");
+    List<Class<? extends ConstraintValidator>> violations =
+        asList(NotNullValidator.class, NotBlankValidator.class);
+    setActualViolations(matcher, violations);
+    Description description = new StringDescription();
+    Bean bean = new Bean("foo", 42);
+    // when
+    matcher.describeMismatch(bean, description);
+    // then
+    assertThat(
+        description.toString(),
+        is(
+            "violated constraints <["
+                + violations.stream().map(Object::toString).collect(Collectors.joining(", "))
+                + "]> on field \"foo\""));
+  }
+
+  @Test
+  void shouldDescribeMismatchForHasViolationsWhenValid() {
+    // given
+    Matcher<Bean> matcher = new HasViolationsMatcher<>(NotNullValidator.class);
+    setActualViolations(matcher, emptyList());
+    Description description = new StringDescription();
+    Bean bean = new Bean("foo", 42);
+    // when
+    matcher.describeMismatch(bean, description);
+    // then
+    assertThat(description.toString(), is("was valid"));
+  }
+
+  @Test
+  void shouldDescribeMismatchForHasViolationsForFieldWhenValid() {
+    // given
+    Matcher<Bean> matcher = new HasViolationsMatcher<>(NotNullValidator.class, "foo");
+    setActualViolations(matcher, emptyList());
+    Description description = new StringDescription();
+    Bean bean = new Bean("foo", 42);
+    // when
+    matcher.describeMismatch(bean, description);
+    // then
+    assertThat(description.toString(), is("was valid on field \"foo\""));
+  }
+
+  @Test
+  void shouldDescribeMismatchForHasViolationsWhenFailsOtherValidators() {
+    // given
+    Matcher<Bean> matcher = new HasViolationsMatcher<>(NotNullValidator.class);
+    setActualViolations(matcher, asList(NotBlankValidator.class));
+    Description description = new StringDescription();
+    Bean bean = new Bean("foo", 42);
+    // when
+    matcher.describeMismatch(bean, description);
+    // then
+    assertThat(
+        description.toString(),
+        is(
+            "violated constraints <["
+                + NotBlankValidator.class.toString()
+                + "]> but not <"
+                + NotNullValidator.class.toString()
+                + ">"));
+  }
+
+  @Test
+  void shouldDescribeMismatchForHasViolationsForFieldWhenFailsOtherValidators() {
+    // given
+    Matcher<Bean> matcher = new HasViolationsMatcher<>(NotNullValidator.class, "foo");
+    setActualViolations(matcher, asList(NotBlankValidator.class));
+    Description description = new StringDescription();
+    Bean bean = new Bean("foo", 42);
+    // when
+    matcher.describeMismatch(bean, description);
+    // then
+    assertThat(
+        description.toString(),
+        is(
+            "violated constraints <["
+                + NotBlankValidator.class.toString()
+                + "]> but not <"
+                + NotNullValidator.class.toString()
+                + "> on field \"foo\""));
+  }
+
+  private static <T> void setActualViolations(
+      Matcher<T> matcher, List<Class<? extends ConstraintValidator>> actualViolations) {
+    Field field = Reflection.findField(AbstractViolationsMatcher.class, "actualViolations");
+    field.setAccessible(true);
+    ReflectionUtils.setField(field, matcher, actualViolations);
   }
 }
