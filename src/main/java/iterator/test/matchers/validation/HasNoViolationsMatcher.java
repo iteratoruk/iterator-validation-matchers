@@ -22,7 +22,7 @@ import org.hamcrest.Description;
 public class HasNoViolationsMatcher<T> extends AbstractViolationsMatcher<T> {
 
   HasNoViolationsMatcher() {
-    this(null);
+    super();
   }
 
   HasNoViolationsMatcher(String fieldName) {
